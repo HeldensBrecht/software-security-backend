@@ -1,10 +1,11 @@
 const mysql = require("mysql");
-const connection = mysql.createPool({
+const connection = mysql.createConnection({
   connectionLimit: 10,
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "software-security",
+  host: process.env.RDS_HOSTNAME,
+  user: process.env.RDS_USERNAME,
+  password: process.env.RDS_PASSWORD,
+  port: process.env.RDS_PORT,
+  // database: "software-security",
 });
 
 module.exports = connection;
