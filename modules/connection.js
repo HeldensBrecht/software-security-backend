@@ -1,5 +1,5 @@
 const mysql = require("mysql");
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   connectionLimit: 10,
   host: process.env.RDS_HOSTNAME,
   user: process.env.RDS_USERNAME,
