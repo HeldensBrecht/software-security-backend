@@ -1,0 +1,26 @@
+{
+  "name": "software-security-backend",
+  "version": "1.0.0",
+  "description": "Backend voor opgave 2 - Software Security",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HeldensBrecht/software-security-backend.git"
+  },
+  "keywords": [],
+  "author": "Brecht Heldens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HeldensBrecht/software-security-backend/issues"
+  },
+  "homepage": "https://github.com/HeldensBrecht/software-security-backend#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
+    "jwks-rsa": "^1.11.0"
+  }
+}
