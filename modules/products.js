@@ -1,17 +1,22 @@
 "use strict";
 const connection = require("./connection");
 
-const get = async () =>
-  await new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT products.id, products.name, products.description, products.price, products.category, product_images.image FROM products JOIN product_images ON (products.id = product_images.product_id) WHERE product_images.image_index = 1",
-      (err, res) => {
-        return err || res.length === 0
-          ? reject({ error: "Cannot retrieve products" })
-          : resolve(res);
-      }
-    );
+const get = async (queryParams) => {
+  let query =
+    "SELECT products.id, products.name, products.description, products.price, products.category, product_images.image FROM products JOIN product_images ON (products.id = product_images.product_id) WHERE product_images.image_index = 1";
+  let params = [];
+  if (queryParams.category) {
+    query += " AND products.category = ?";
+    params.push(queryParams.category);
+  }
+  return await new Promise((resolve, reject) => {
+    connection.query(query, params, (err, res) => {
+      return err || res.length === 0
+        ? reject({ error: "Cannot retrieve products" })
+        : resolve(res);
+    });
   });
+};
 
 const one = async (id) =>
   await new Promise((resolve, reject) => {
@@ -29,7 +34,7 @@ const one = async (id) =>
             if (err || res.length === 0) {
               return reject({ error: "Cannot retrieve product images" });
             }
-            resolve({ ...product[0], images: { ...res } });
+            resolve({ ...product[0], images: [...res] });
           }
         );
       }
@@ -46,7 +51,7 @@ const store = async () =>
   });
 
 module.exports = {
-  get: get,
-  one: one,
-  store: store,
+  get,
+  one,
+  store,
 };
