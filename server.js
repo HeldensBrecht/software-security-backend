@@ -84,6 +84,13 @@ app.put("/products/:prodId", validateJwt, (req, res) => {
     .catch((err) => res.send(err));
 });
 
+app.delete("/products/:prodId", validateJwt, (req, res) => {
+  products
+    .destroy(req.id)
+    .then((result) => res.send(result))
+    .catch((err) => res.send(err));
+});
+
 app.listen(PORT, () =>
   console.log(`Ewaja backend app listening on at http://localhost:${PORT}`)
 );
