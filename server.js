@@ -2,7 +2,7 @@ const express = require("express");
 // const session = require("express-session");
 // const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const csrf = require("csurf");
+// const csrf = require("csurf");
 const jwt = require("express-jwt");
 const jwks = require("jwks-rsa");
 require("dotenv").config();
@@ -30,7 +30,7 @@ const corsOptions = {
   allowedHeaders:
     "Origin, X-Requested-With, Content-Type, Accept, Authorization, _csrf",
   credentials: true,
-  origin: "http://localhost:3000",
+  // origin: "http://localhost:3000",
 };
 
 // const csrfProtection = csrf({ cookie: true });

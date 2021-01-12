@@ -1,6 +1,8 @@
 # software-security-backend
 
-Backend voor opgave 2 - Software Security
+Backend for assignment 2 - Software Security
+
+This is a REST API regarding products for a music store. This music store only sells vinyl and apparel (merch). The service is publically available at https://softwaresec.brechtheldens.xyz
 
 ## Operations on resources
 
