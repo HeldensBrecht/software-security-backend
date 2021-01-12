@@ -6,24 +6,50 @@ Backend voor opgave 2 - Software Security
 
 ### / (root)
 
-`Operations: OPTIONS, GET`
+`OPTIONS, GET`
+
+No authentication required
 
 ### /user
 
-`Operations: OPTIONS, GET`
+`OPTIONS, GET`
+
+**GET**: Requires authentication
 
 ### /users
 
-`Operations: OPTIONS, POST`
+`OPTIONS, POST`
+
+**POST**: Requires authentication
 
 ### /users/{user_id}
 
-`Operations: OPTIONS, POST, PUT`
+`OPTIONS, POST, PUT, DELETE`
+
+**POST**: Requires authentication
+**PUT**: Requires authentication
 
 ### /products
 
-`Operations: OPTIONS, GET, POST`
+`OPTIONS, GET, POST`
+
+**GET**: No authentication required
+**POST**: Requires authentication
 
 ### /products/{product_id}
 
-`Operations: OPTIONS, GET, PUT, DELETE`
+`OPTIONS, GET, PUT, DELETE`
+
+**GET**: No authentication required
+**PUT**: Requires authentication
+**DELETE**: Requires authentication
+
+## User roles and permissions
+
+### Normal user
+
+Can create/update/delete products. Cannot modify or delete products from other users.
+
+### Admin
+
+Can delete products. Cannot create or modify products.
