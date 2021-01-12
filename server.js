@@ -193,7 +193,7 @@ app.post(
     users
       .store(req.user, req.body)
       .then((result) => res.status(201).location(`/users/${result}`).send())
-      .catch((err) => res.send(err));
+      .catch((err) => res.status(400).end());
   }
 );
 
@@ -231,7 +231,7 @@ app.put(
     users
       .update(req.caller_id, req.body)
       .then((result) => res.end())
-      .catch((err) => res.status(500).end());
+      .catch((err) => res.status(400).end());
   }
 );
 
@@ -245,7 +245,7 @@ app.delete(
     users
       .destroy(req.userId)
       .then((result) => res.end())
-      .catch((err) => res.status(500).end());
+      .catch((err) => res.status(400).end());
   }
 );
 
@@ -282,7 +282,7 @@ app.post(
           .then((result) =>
             res.status(201).append("Location", `/products/${result}`).send()
           )
-          .catch((err) => res.send(err))
+          .catch((err) => res.status(400).end())
       : res.status(403).end();
   }
 );
@@ -320,7 +320,7 @@ app.put(
     products
       .update(req.body, req.prodId)
       .then((result) => res.status(200).end())
-      .catch((err) => res.status(404).end());
+      .catch((err) => res.status(400).end());
   }
 );
 
@@ -335,7 +335,7 @@ app.delete(
       ? products
           .destroy(req.prodId)
           .then((result) => res.end())
-          .catch((err) => res.status(404).end())
+          .catch((err) => res.status(400).end())
       : res.status(403).end();
   }
 );

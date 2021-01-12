@@ -6,24 +6,24 @@ Backend voor opgave 2 - Software Security
 
 ### / (root)
 
-#### Operations: OPTIONS, GET
+`Operations: OPTIONS, GET`
 
 ### /user
 
-#### Operations: OPTIONS, GET
+`Operations: OPTIONS, GET`
 
 ### /users
 
-#### Operations: OPTIONS, POST
+`Operations: OPTIONS, POST`
 
 ### /users/{user_id}
 
-#### Operations: OPTIONS, POST, PUT
+`Operations: OPTIONS, POST, PUT`
 
 ### /products
 
-#### Operations: OPTIONS, GET, POST
+`Operations: OPTIONS, GET, POST`
 
 ### /products/{product_id}
 
-#### Operations: OPTIONS, GET, PUT, DELETE
+`Operations: OPTIONS, GET, PUT, DELETE`
