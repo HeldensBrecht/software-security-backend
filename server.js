@@ -1,8 +1,5 @@
 const express = require("express");
-// const session = require("express-session");
-// const cookieParser = require("cookie-parser");
 const cors = require("cors");
-// const csrf = require("csurf");
 const jwt = require("express-jwt");
 const jwks = require("jwks-rsa");
 require("dotenv").config();
@@ -28,37 +25,15 @@ const validateJwt = jwt({
 
 const corsOptions = {
   allowedHeaders:
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, _csrf",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, CSRF-Token, X-CSRF-Token",
   credentials: true,
-  // origin: "http://localhost:3000",
+  origin: process.env.FRONTEND_APP_URL,
 };
 
-// const csrfProtection = csrf({ cookie: true });
-
 const app = express();
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { secure: process.env.NODE_ENV === "production" },
-//   })
-// );
 app.use(express.json());
-// app.use(cookieParser());
-// app.use(csrfProtection);
 
 // app.use(cors({ ...corsOptions }));
-// app.use(function (req, res, next) {
-//   // res.header("Access-Control-Allow-Origin", process.env.FRONTEND_APP_URL);
-//   res.header("Access-Control-Allow-Origin", "*");
-//   // res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-//   );
-//   next();
-// });
 
 app.use((req, res, next) => {
   res.format({
@@ -67,12 +42,15 @@ app.use((req, res, next) => {
   });
 });
 
+/* ------------------------
+  RETRIEVING PARAMS
+------------------------ */
 app.param("userId", (req, res, next, id) => {
   if (!isNaN(id) && !isNaN(parseInt(id))) {
     req.userId = id;
     next();
   } else {
-    next(new Error("ID is not a number"));
+    res.status(400).end();
   }
 });
 
@@ -81,22 +59,8 @@ app.param("prodId", (req, res, next, id) => {
     req.prodId = id;
     next();
   } else {
-    next(new Error("ID is not a number"));
+    res.status(400).end();
   }
-});
-
-//
-app.options("/", cors({ ...corsOptions, methods: "GET, OPTIONS" }));
-app.get("/", (req, res) => res.send("Ewaja backend"));
-// app.all("/*", cors(corsOptions));
-app.all("/", (req, res) => res.status(405).end());
-
-/* ------------------------
-    INJECTING CSRF TOKEN
------------------------- */
-const withCsrfToken = (req, response) => ({
-  csrfToken: req.csrfToken(),
-  ...response,
 });
 
 /* ------------------------
@@ -109,7 +73,7 @@ const getUserID = (req, res, next) => {
       next();
     });
   } else {
-    res.status(403).end();
+    res.status(401).end();
   }
 };
 
@@ -126,32 +90,30 @@ const ownUser = (req, res, next) => {
           res.status(403).end();
         }
       })
-      .catch((err) => res.status(403).end());
+      .catch((err) => res.status(404).end());
   } else {
-    res.status(403).end();
+    res.status(500).end();
   }
 };
 
 const isOwnUserOrAdmin = (req, res, next) => {
-  req.isAdmin = false;
-  if (req.userId) {
-    if (req.userId === req.caller_id) {
-      req.isAdmin = true;
-      next();
-    } else {
-      users.isAdmin(req.caller_id).then((isAdmin) => {
-        req.isAdmin = isAdmin;
+  if (req.prodId) {
+    users.isAdmin(req.caller_id).then((isAdmin) => {
+      if (isAdmin) {
         next();
-      });
-    }
-  } else if (req.prodId) {
-    products
-      .getUser(req.prodId)
-      .then((product_user_id) => {
-        req.isAdmin = product_user_id === req.caller_id;
-        next();
-      })
-      .catch(() => res.status(404).end());
+      } else {
+        products
+          .getUser(req.prodId)
+          .then((product_user_id) => {
+            if (product_user_id === req.caller_id) {
+              next();
+            } else {
+              res.status(403).end();
+            }
+          })
+          .catch(() => res.status(404).end());
+      }
+    });
   } else {
     res.status(500).end();
   }
@@ -164,6 +126,14 @@ const isAdmin = (req, res, next) => {
     next();
   });
 };
+
+/* ------------------------
+          ROOT
+------------------------ */
+app.options("/", cors({ ...corsOptions, methods: "GET, OPTIONS" }));
+app.get("/", (req, res) => res.send("Ewaja backend"));
+// app.all("/*", cors(corsOptions));
+app.all("/", (req, res) => res.status(405).end());
 
 /* ------------------------
           USERS
@@ -298,21 +268,16 @@ app.options(
   cors({ ...corsOptions, methods: "GET, PUT, DELETE, OPTIONS" })
 );
 
-app.get(
-  "/products/:prodId",
-  cors(corsOptions),
-  /*csrfProtection,*/ (req, res) => {
-    products
-      .one(req.prodId)
-      .then((result) => res.send(result))
-      .catch((err) => res.status(404).end());
-  }
-);
+app.get("/products/:prodId", cors(corsOptions), (req, res) => {
+  products
+    .one(req.prodId)
+    .then((result) => res.send(result))
+    .catch((err) => res.status(404).end());
+});
 
 app.put(
   "/products/:prodId",
   cors(corsOptions),
-  // csrfProtection,
   validateJwt,
   getUserID,
   ownUser,
@@ -331,12 +296,10 @@ app.delete(
   getUserID,
   isOwnUserOrAdmin,
   (req, res) => {
-    req.isAdmin
-      ? products
-          .destroy(req.prodId)
-          .then((result) => res.end())
-          .catch((err) => res.status(400).end())
-      : res.status(403).end();
+    products
+      .destroy(req.prodId)
+      .then((result) => res.end())
+      .catch((err) => res.status(400).end());
   }
 );
 
