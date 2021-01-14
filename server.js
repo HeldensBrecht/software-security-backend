@@ -5,8 +5,10 @@ const jwks = require("jwks-rsa");
 require("dotenv").config();
 
 const { PORT = 3001 } = process.env;
+
 const products = require("./modules/products.js");
 const users = require("./modules/users.js");
+const auth0 = require("./modules/auth0.js");
 
 const validateJwt = jwt({
   //Signing key providen + cachen
@@ -68,17 +70,20 @@ app.param("prodId", (req, res, next, id) => {
 ------------------------ */
 const getUserID = (req, res, next) => {
   if (req.user) {
-    users.getUserID(req.user).then((user_id) => {
-      req.caller_id = user_id;
-      next();
-    });
+    users
+      .getUserID(req.user)
+      .then((user_id) => {
+        req.caller_id = user_id;
+        next();
+      })
+      .catch((err) => res.status(401).end());
   } else {
     res.status(401).end();
   }
 };
 
 const ownUser = (req, res, next) => {
-  if (req.userId && req.userId === req.caller_id) {
+  if (req.userId && req.userId == req.caller_id) {
     next();
   } else if (req.prodId) {
     products
@@ -131,8 +136,9 @@ const isAdmin = (req, res, next) => {
           ROOT
 ------------------------ */
 app.options("/", cors({ ...corsOptions, methods: "GET, OPTIONS" }));
-app.get("/", (req, res) => res.send("Ewaja backend"));
-// app.all("/*", cors(corsOptions));
+
+app.get("/", cors(corsOptions), (req, res) => res.send("Ewaja backend"));
+
 app.all("/", (req, res) => res.status(405).end());
 
 /* ------------------------
@@ -160,9 +166,14 @@ app.post(
   cors({ ...corsOptions, exposedHeaders: "Location" }),
   validateJwt,
   (req, res) => {
-    users
-      .store(req.user, req.body)
-      .then((result) => res.status(201).location(`/users/${result}`).send())
+    auth0
+      .getUser(req.user)
+      .then((auth0User) => {
+        users
+          .store(req.user, auth0User)
+          .then((result) => res.status(201).location(`/users/${result}`).send())
+          .catch((err) => res.status(400).end());
+      })
       .catch((err) => res.status(400).end());
   }
 );
@@ -200,7 +211,13 @@ app.put(
   (req, res) => {
     users
       .update(req.caller_id, req.body)
-      .then((result) => res.end())
+      .then((result) => {
+        auth0
+          .updateUser(req.user, req.body)
+          .then((res) => {})
+          .catch((err) => console.log(err));
+        res.end();
+      })
       .catch((err) => res.status(400).end());
   }
 );
@@ -214,7 +231,12 @@ app.delete(
   (req, res) => {
     users
       .destroy(req.userId)
-      .then((result) => res.end())
+      .then((result) => {
+        auth0
+          .deleteUser(req.user)
+          .then(() => res.end())
+          .catch((err) => res.status(400).end());
+      })
       .catch((err) => res.status(400).end());
   }
 );

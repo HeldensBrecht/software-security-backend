@@ -62,11 +62,11 @@ const store = async ({ sub }, { username }, role = 0) =>
     );
   });
 
-const update = async (userId, { role = 0 }) =>
+const update = async (userId, { username }) =>
   await new Promise((resolve, reject) => {
     connection.query(
-      "UPDATE users SET `username` = ?, `role` = ? WHERE `id` = ?",
-      [username, role, userId],
+      "UPDATE users SET `username` = ? WHERE `id` = ?",
+      [username, userId],
       (err, res) => {
         return err || res.length === 0 ? reject() : resolve();
       }
