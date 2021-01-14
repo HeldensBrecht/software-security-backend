@@ -6,6 +6,8 @@ This is a REST API regarding products for a music store. This music store only s
 
 ## Operations on resources
 
+All operations on resources are only allowed by Origin `https://www.brechtheldens.xyz`
+
 ### / (root)
 
 `OPTIONS, GET`
@@ -55,3 +57,13 @@ Can create/update/delete products. Cannot modify or delete products from other u
 ### Admin
 
 Can delete products. Cannot create or modify products.
+
+## Prevention of common web vulnerabilities
+
+### CSRF Mitigation
+
+Auth0 is used as identity provider. Upon login, the accesstoken is kept in memory at all times without setting a cookie.
+
+### SQL Injection
+
+Incoming data is never concatenated in a SQL query. Instead, the data gets bound to SQL parameters.
