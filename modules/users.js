@@ -26,6 +26,22 @@ const isAdmin = async (userId) =>
     );
   });
 
+const getAllData = async ({ sub }) =>
+  await new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM users WHERE `sub` = ?",
+      [sub],
+      (err, user) => {
+        err || user.length === 0
+          ? reject()
+          : products
+              .getByUser(user[0].id)
+              .then((products) => resolve({ user: user[0], products }))
+              .catch((err) => resolve({ user: user[0], products: [] }));
+      }
+    );
+  });
+
 const one = async (userId, { sub = undefined }, isAdmin = false) => {
   let query = "SELECT `id`, `username` FROM users WHERE `id` = ?";
   let filters = [userId];
@@ -87,6 +103,7 @@ const destroy = async (userId) =>
 module.exports = {
   getUserID,
   isAdmin,
+  getAllData,
   one,
   store,
   update,
