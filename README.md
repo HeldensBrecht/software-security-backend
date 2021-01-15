@@ -20,6 +20,12 @@ No authentication required
 
 **GET**: Requires authentication
 
+### /alluserdata/{user_id}
+
+`OPTIONS, GET`
+
+**GET**: Requires authentication
+
 ### /users
 
 `OPTIONS, POST`

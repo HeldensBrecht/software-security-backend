@@ -159,6 +159,44 @@ app.all("/user", (req, res) => {
 });
 
 //
+app.options(
+  "/alluserdata/:userId",
+  cors({ ...corsOptions, methods: "GET, OPTIONS" })
+);
+
+app.get(
+  "/alluserdata/:userId",
+  cors(corsOptions),
+  validateJwt,
+  getUserID,
+  ownUser,
+  (req, res) => {
+    users
+      .getAllData(req.user)
+      .then((internalUserData) => {
+        auth0
+          .getUser(req.user)
+          .then((auth0UserData) =>
+            res.send({ ...internalUserData, auth0: auth0UserData })
+          )
+          .catch((err) =>
+            res.send({
+              ...internalUserData,
+              auth0:
+                "An error occured, please contact us for this data section",
+            })
+          );
+      })
+      .catch((err) => res.status(404).end());
+  }
+);
+
+app.all("/alluserdata/:userId", (req, res) => {
+  res.set("Allow", "GET, OPTIONS");
+  res.status(405).end();
+});
+
+//
 app.options("/users", cors({ ...corsOptions, methods: "POST, OPTIONS" }));
 
 app.post(
