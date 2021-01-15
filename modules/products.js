@@ -85,8 +85,17 @@ const store = async (
 
         //TODO: Loop over images and store them
         connection.query(
-          "INSERT INTO product_images VALUES (NULL, ?, ?, ?)",
-          [product.insertId, "holding-album-square.jpg", 1],
+          "INSERT INTO product_images VALUES (NULL, ?, ?, ?), (NULL, ?, ?, ?)",
+          [
+            product.insertId,
+            category === "vinyl"
+              ? "holding-album-square.jpg"
+              : "girl-hoodie.jpg",
+            1,
+            product.insertId,
+            category === "vinyl" ? "vinyl.jpg" : "man-hoodie.jpg",
+            2,
+          ],
           (err, res) => {
             return err || res.length === 0
               ? reject({ error: `Cannot store product images: ${err.message}` })
